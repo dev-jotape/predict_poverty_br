@@ -6,6 +6,9 @@ import tensorflow.keras.utils as utils
 from sklearn.model_selection import train_test_split
 import json as simplejson
 import time
+import pandas as pd
+from keras.models import load_model
+from tensorflow.keras.applications.imagenet_utils import preprocess_input
 
 # Define the input shape of your model
 input_shape = (224, 224, 3)
@@ -17,14 +20,6 @@ for i, layer in enumerate(base_model.layers):
     print(i, layer.name, layer.trainable)
 
 # Create a new model instance with the top layer
-# model = tf.keras.Sequential([
-#     base_model,
-#     # tf.keras.layers.GlobalAveragePooling2D(),
-#     tf.keras.layers.Flatten(),
-#     tf.keras.layers.Dense(256, activation='relu'),
-#     tf.keras.layers.Dropout(0.5),
-#     tf.keras.layers.Dense(3, activation='softmax')
-# ])
 x = base_model.output
 x = tf.keras.layers.Flatten()(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
@@ -55,7 +50,7 @@ model.compile(
 )
 
 # Fit model (storing  weights) -------------------------------------------
-filepath="./weights/weights_resnet_imagenet_finetuning.hdf5"
+filepath="./weights.hdf5"
 checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, 
                              monitor='val_accuracy', 
                              verbose=1, 
@@ -110,7 +105,7 @@ print(t2 - t1)
 
 model_json = model.to_json()
 
-with open("./model/model_resnet_imagenet_finetuning.json", "w") as json_file:
+with open("./model.json", "w") as json_file:
     json_file.write(simplejson.dumps(simplejson.loads(model_json), indent=4))
 
 
@@ -119,3 +114,51 @@ with open("./model/model_resnet_imagenet_finetuning.json", "w") as json_file:
 score = model.evaluate(x_test, y_test, verbose=1)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1]) 
+
+### EXTRACT FEATURES ---------------------------------------------------------
+
+# cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
+# model = load_model('./weights.hdf5')
+# extract_model = tf.keras.Model(model.inputs, model.layers[-5].output) 
+
+# def process_input(img_path):
+#     try:
+#         img = utils.load_img('../../' + img_path, target_size=input_shape)
+#         x = utils.img_to_array(img)
+#         x = np.expand_dims(x, axis=0)
+#         x = preprocess_input(x)
+#         img_features = extract_model.predict(x)[0]
+#         return img_features
+#     except NameError:
+#         print('error => ', img_path)
+#         print('error => ', NameError)
+#         return None
+    
+# cities_images = []
+# population_labels = []
+# income_labels = []
+# count = 0
+# for city in cities_indicators['city_code'].unique():
+#     df_filter = cities_indicators[cities_indicators['city_code']==city]
+#     city_images = []
+#     print(count)
+#     count = count+1
+#     for i in range(df_filter.shape[0]):
+#         img = process_input(df_filter.iloc[i, 0])
+#         city_images.append(img)
+#     city_feat = np.append(np.mean(city_images, axis=0), df_filter.iloc[0, 1])
+#     cities_images.append(city_feat)
+#     population_labels.append(df_filter.iloc[0, 5])
+#     income_labels.append(df_filter.iloc[0, 6])
+
+# features_final = np.asarray(cities_images)
+# print(features_final.shape)
+
+# features_finetuning = features_final
+# population_finetuning = np.asarray(population_labels)
+# income_finetuning = np.asarray(income_labels)
+
+# ### Save data --------------------------------------------------------------
+# np.save('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy', features_finetuning)
+# np.save('../../dataset/features/resnet50_imagenet_finetuning/population.npy', population_finetuning)
+# np.save('../../dataset/features/resnet50_imagenet_finetuning/income.npy', income_finetuning)
