@@ -9,6 +9,8 @@ from tensorflow.keras.layers import Dense
 import numpy as np
 from tensorflow.keras.optimizers import Adam
 import json as simplejson
+import pandas as pd
+from keras.models import load_model
 # import os
 # import time
 
@@ -123,7 +125,7 @@ model.compile(
 )
 
 # Fit model (storing  weights) -------------------------------------------
-filepath="./weights/weights_from_scratch.hdf5"
+filepath="./weights.hdf5"
 checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, 
                              monitor='val_accuracy', 
                              verbose=1, 
@@ -152,7 +154,7 @@ history = model.fit(x_train, y_train,
 
 model_json = model.to_json()
 
-with open("./model/model_from_scratch.json", "w") as json_file:
+with open("./model.json", "w") as json_file:
     json_file.write(simplejson.dumps(simplejson.loads(model_json), indent=4))
 
 ### evaluate model ---------------------------------------------------------
@@ -160,3 +162,51 @@ with open("./model/model_from_scratch.json", "w") as json_file:
 score = model.evaluate(x_test, y_test, verbose=1)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1]) 
+
+### EXTRACT FEATURES ---------------------------------------------------------
+
+cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
+model = load_model('./weights.hdf5')
+extract_model = tf.keras.Model(model.inputs, model.layers[-5].output) 
+
+def process_input(img_path):
+    try:
+        img = utils.load_img('../../' + img_path, target_size=input_shape)
+        x = utils.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = preprocess_input(x)
+        img_features = extract_model.predict(x)[0]
+        return img_features
+    except NameError:
+        print('error => ', img_path)
+        print('error => ', NameError)
+        return None
+    
+cities_images = []
+population_labels = []
+income_labels = []
+count = 0
+for city in cities_indicators['city_code'].unique():
+    df_filter = cities_indicators[cities_indicators['city_code']==city]
+    city_images = []
+    print(count)
+    count = count+1
+    for i in range(df_filter.shape[0]):
+        img = process_input(df_filter.iloc[i, 0])
+        city_images.append(img)
+    city_feat = np.append(np.mean(city_images, axis=0), df_filter.iloc[0, 1])
+    cities_images.append(city_feat)
+    population_labels.append(df_filter.iloc[0, 5])
+    income_labels.append(df_filter.iloc[0, 6])
+
+features_final = np.asarray(cities_images)
+print(features_final.shape)
+
+features_finetuning = features_final
+population_finetuning = np.asarray(population_labels)
+income_finetuning = np.asarray(income_labels)
+
+### Save data --------------------------------------------------------------
+np.save('../../dataset/features/vgg16_from_scratch/features_with_city_code.npy', features_finetuning)
+np.save('../../dataset/features/vgg16_from_scratch/population_imagenet_finetuning.npy', population_finetuning)
+np.save('../../dataset/features/vgg16_from_scratch/income_imagenet_finetuning.npy', income_finetuning)

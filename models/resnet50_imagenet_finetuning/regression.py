@@ -2,20 +2,25 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNet, ElasticNetCV
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow.keras.utils as utils
+from sklearn.metrics import make_scorer
 
 # Carrega o conjunto de dados
-x_all = np.load('../../dataset/features/features_imagenet_finetuning.npy')
-# y_all = np.load('../../dataset/features/population_imagenet_finetuning.npy')
-y_all = np.load('../../dataset/features/income_imagenet_finetuning.npy')
+x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy')
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/population.npy')
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income.npy')
 
 print(x_all.shape)
 print(y_all.shape)
 
-y_all = np.log(y_all)
+# remove city_code column
+x_all = np.delete(x_all, -1, axis=1)
+
+# y in natural log
+# y_all = np.log(y_all)
 
 # Normalizando os dados
 scaler = StandardScaler()
@@ -24,10 +29,10 @@ x_all = scaler.fit_transform(x_all)
 ### TUNE LAMBDA
 
 # Divida o conjunto de dados em conjunto de treinamento e validação
-x_train, x_val, y_train, y_val = train_test_split(x_all, y_all, test_size=0.2, random_state=42)
+x_train, x_val, y_train, y_val = train_test_split(x_all, y_all, test_size=0.3, random_state=42)
 
-print(x_train.shape)
-print(x_val.shape)
+print('X TRAIN SHAPE => ', x_train.shape)
+print('Y TRAIN SHAPE => ', x_val.shape)
 
 # Set up GridSearchCV with nested cross-validation
 '''
@@ -40,23 +45,24 @@ tol: diferença mínima aceitável entre o valor da função de custo em duas it
 n_jobs: Numero de jobs rodando em paralelo. None significa 1. -1 significa todos os processadores.
 cv: numero de folds. Ex: se 5, os dados serão divididos em 5 folds e o modelo será executado 5 vezes, cada vez com um conjunto diferente.
 '''
-# param_grid = {'alpha': [0.001, 0.01, 0.1, 1, 10, 100], 'l1_ratio': [0, 1, 0.5], 'max_iter': [10000], 'tol': [0.0001]}
-# grid_cv = GridSearchCV(ElasticNet(), param_grid, cv=10, scoring='neg_mean_absolute_error', n_jobs=-1)
+param_grid = {'alpha': [0.001, 0.01, 0.1, 1, 10, 100], 'l1_ratio': [0, 1, 0.5], 'max_iter': [10000], 'tol': [0.0001]}
+grid_cv = GridSearchCV(ElasticNet(), param_grid, cv=10, scoring='neg_mean_absolute_error', n_jobs=-1)
 
-# # Train the model
-# grid_cv.fit(x_train, y_train)
+# Train the model
+grid_cv.fit(x_train, y_train)
 
-# # Get the best hyperparameters
-# alpha = grid_cv.best_params_['alpha']
-# l1_ratio = grid_cv.best_params_['l1_ratio']
+# Get the best hyperparameters
+alpha = grid_cv.best_params_['alpha']
+l1_ratio = grid_cv.best_params_['l1_ratio']
 
-# print('best alpha => ', alpha)
-# print('best l1_ratio => ', l1_ratio)
+print('best alpha => ', alpha)
+print('best l1_ratio => ', l1_ratio)
+# print('cv results => ', grid_cv.cv_results_)
+print('avg score => ', grid_cv.best_score_)
 
 # Train the model on the complete training set
-model = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=10000, tol=0.0001)
-# model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, tol=0.0001)
-# model = ElasticNet(alpha=1, l1_ratio=0, max_iter=10000, tol=0.0001)
+model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, tol=0.0001)
+# model = ElasticNetCV(alpha=0.01, l1_ratio=1, max_iter=10000, tol=0.0001,cv=10)
 model.fit(x_train, y_train)
 
 # Make predictions on test set
@@ -67,17 +73,26 @@ R2 = r2_score(y_val, predictions)
 RMSE = mean_squared_error(y_val, predictions, squared=False)
 MAE = mean_absolute_error(y_val, predictions)
 
-
-print('predictions ', predictions)
-print('real ', y_val)
+# print('predictions ', predictions)
+# print('real ', y_val)
+# print('real ', y_ba)
 
 print('R2 ', R2)
 print('RMSE ', RMSE)
 print('MAE ', MAE)
 
-x_exp = np.exp(predictions)
-y_exp = np.exp(y_val)
-MAE_exp = mean_absolute_error(x_exp, y_exp)
-print('predictions exp. ', x_exp)
-print('real exp. ', y_exp)
-print('MAE exp. ', MAE_exp)
+# if y in log
+# predictions_exp = np.exp(predictions)
+# y_exp = np.exp(y_val)
+
+
+# print('predictions_exp ', predictions_exp)
+# print('y_exp ', y_exp)
+
+# R2_exp = r2_score(y_exp, predictions_exp)
+# RMSE_exp = mean_squared_error(y_exp, predictions_exp, squared=False)
+# MAE_exp = mean_absolute_error(y_exp, predictions_exp)
+
+# print('R2 exp ', R2_exp)
+# print('RMSE exp ', RMSE_exp)
+# print('MAE exp ', MAE_exp)

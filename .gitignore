@@ -1,14 +1,8 @@
 model/*
-!model/small_cities_sample.csv
 input/
 dataset
-extract-features/vgg/dataset
-extract-features/vgg/model
-extract-features/vgg/weights
 **.h5
+**.hdf5
 **.json
 **.pkl
-extract-features/resnet/export weights
-extract-features/resnet/weights
-extract-features/resnet/model
 __pycache__
