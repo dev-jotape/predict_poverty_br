@@ -11,18 +11,21 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Carrega o conjunto de dados
-features = np.load('../../dataset/features/vgg16_imagenet/features_with_city_code.npy')
-# y_all = np.load('../../dataset/features/vgg16_imagenet/population.npy')
+features_image = pd.DataFrame(np.load('../../dataset/features/vgg16_imagenet/features_with_city_code.npy'))
+features_finetunin = pd.DataFrame(np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy'))
+features_scratch = pd.DataFrame(np.load('../../dataset/features/vgg16_from_scratch/features_with_city_code.npy'))
+
 y_all = np.load('../../dataset/features/vgg16_imagenet/income.npy')
 lights = pd.read_csv('../../excel-files/nearest_nightlights_per_city.csv')[['city_code', 'radiance']]
-x_df = pd.DataFrame(features)
+
+features_merged = pd.merge(left=features_image, right=features_finetunin, on=25088, how='left')
+features_merged = pd.merge(left=features_merged, right=features_scratch, on=25088, how='left')
 
 lights_grouped = lights.groupby(['city_code'], as_index=False).agg({'radiance':['mean','median','max', 'min', 'std']})
 lights_grouped.columns = ['city_code', 'mean','median','max', 'min', 'std']
 
-merge = pd.merge(left=x_df, left_on=25088, right=lights_grouped, right_on='city_code', how='left')
+merge = pd.merge(left=features_merged, left_on=25088, right=lights_grouped, right_on='city_code', how='left')
 merge = merge.loc[:, ~merge.columns.isin([25088, 'city_code'])]
-# print(merge)
 
 x_all = merge.to_numpy()
 
@@ -83,7 +86,10 @@ l1_ratio = grid_cv.best_params_['l1_ratio']
 print('best alpha => ', alpha)
 print('best l1_ratio => ', l1_ratio)
 print('avg score => ', grid_cv.best_score_)
-print('result => ', grid_cv.cv_results_)
+# print('result => ', grid_cv.cv_results_)
+# best alpha =>  1
+# best l1_ratio =>  0.5
+# avg score =>  -132.88560938522957
 exit()
 # Train the model on the complete training set
 model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, tol=0.0001)
