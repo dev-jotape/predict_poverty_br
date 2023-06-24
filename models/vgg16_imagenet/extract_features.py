@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report
 import pandas as pd
 from keras.models import load_model
+from keras.models import Model
 
 # import time
 
@@ -38,18 +39,19 @@ input_shape = (224,224,3)
 # # Divida o conjunto de treinamento em conjunto de treinamento e validação
 # x_train, x_val, y_train, y_val = train_test_split(x_train_val, y_train_val, stratify=y_train_val, test_size=val_ratio/(train_ratio+val_ratio), random_state=123)
 
-# print('CREATING MODEL -----------------------------')
+# # print('CREATING MODEL -----------------------------')
 
 # # Cria o modelo base VGG16
-# base_model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
+# base_model = VGG16(weights='imagenet', input_shape=input_shape)
+# print(base_model.summary())
 
 # # Congelar as camadas de convolução
 # for i, layer in enumerate(base_model.layers):
 #     layer.trainable = False
 #     print(i, layer.name, layer.trainable)
 
-# x = base_model.output
-# x = Flatten()(x)
+# x = base_model.get_layer('fc2').output
+# # x = Flatten()(x)
 # x = Dense(256, activation='relu')(x)
 # x = Dropout(0.5)(x)
 # predictions = Dense(3, activation='softmax')(x)
@@ -119,8 +121,13 @@ input_shape = (224,224,3)
 ### EXTRACT FEATURES ---------------------------------------------------
 cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
 
-base_model = load_model('./weights.hdf5')
-extract_model = tf.keras.Model(base_model.inputs, base_model.layers[-5].output) 
+# base_model = load_model('./weights.hdf5')
+base_model = VGG16(weights='imagenet', input_shape=input_shape)
+extract_model = Model(inputs=base_model.input, outputs=base_model.get_layer('fc2').output)
+
+print(extract_model.summary())
+
+# extract_model = tf.keras.Model(model.inputs, model.layers[-5].output) 
 
 def process_input(img_path):
     try:
@@ -161,5 +168,5 @@ income_finetuning = np.asarray(income_labels)
 
 ### Save data --------------------------------------------------------------
 np.save('../../dataset/features/vgg16_imagenet/features_with_city_code.npy', features_finetuning)
-np.save('../../dataset/features/vgg16_imagenet/population.npy', population_finetuning)
-np.save('../../dataset/features/vgg16_imagenet/income.npy', income_finetuning)
+# np.save('../../dataset/features/vgg16_imagenet/population.npy', population_finetuning)
+# np.save('../../dataset/features/vgg16_imagenet/income.npy', income_finetuning)

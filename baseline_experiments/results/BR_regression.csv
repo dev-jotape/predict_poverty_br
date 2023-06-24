@@ -1,5 +1,0 @@
-Variable,Model,Detail,R2,RMSE,MAE
-All features vs average income,lasso regression,Features standardised and Y in log,0.65020648924358,0.616664955748922,0.504303871289926
-All features vs average income,lasso regression,Features standardised and Y in level,0.67567794915631,182.214733780748,129.192776636339
-All features vs average income,ridge regression pca,Features standardised and Y in log,0.680152731165089,0.50346004549732,0.398660028439512
-All features vs average income,ridge regression pca,Features standardised and Y in level,0.699198735650266,174.254877565806,129.548613463081
