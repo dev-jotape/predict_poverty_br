@@ -1,34 +1,39 @@
 import tensorflow as tf
-from tensorflow.keras.applications.resnet50 import ResNet50
-from tensorflow.keras.optimizers import Adam
+import tensorflow_hub as hub
 import numpy as np
-import tensorflow.keras.utils as utils
+from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
+from keras.layers import Dropout
+from keras.layers.core import Flatten
+from keras.layers.core import Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.applications.resnet50 import ResNet50
 import json as simplejson
-import time
 import pandas as pd
 from keras.models import load_model
 from tensorflow.keras.applications.imagenet_utils import preprocess_input
+import tensorflow.keras.utils as utils
 
-# Define the input shape of your model
-input_shape = (224, 224, 3)
+input_shape = (224,224,3)
 
-# Create an instance of the ResNet50 model without the top layer
-# base_model = ResNet50(include_top=False, input_shape=input_shape, weights='imagenet')
+# print('EXPORT WEIGHTS -----------------------------')
 
-# for i, layer in enumerate(base_model.layers):
-#     print(i, layer.name, layer.trainable)
+module_url = "https://tfhub.dev/google/remote_sensing/so2sat-resnet50/1"
+base_model = hub.KerasLayer(module_url, input_shape=input_shape, trainable=False)
 
 # # Create a new model instance with the top layer
-# x = base_model.output
-# x = tf.keras.layers.Flatten()(x)
-# x = tf.keras.layers.Dense(256, activation='relu')(x)
-# x = tf.keras.layers.Dropout(0.5)(x)
-# predictions = tf.keras.layers.Dense(3, activation='softmax')(x)
-# model = tf.keras.Model(inputs = base_model.input, outputs = predictions)
+model = tf.keras.Sequential([
+    base_model,
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.Dense(3, activation='softmax')
+])
+
+# print(model.summary())
 
 # lr = 1e-4
-# optimizer = Adam(learning_rate=lr)
+# optimizer = Adam()
 
 # METRICS = [
 #       "accuracy",
@@ -67,7 +72,7 @@ input_shape = (224, 224, 3)
 # x_all = np.load('../../dataset/x_all_v2.npy')
 # y_all = np.load('../../dataset/y_all_v2.npy')
 
-# y_all = utils.to_categorical(y_all, num_classes=3)
+# y_all = to_categorical(y_all, num_classes=3)
 
 # train_ratio = 0.7
 # val_ratio = 0.15
@@ -86,20 +91,12 @@ input_shape = (224, 224, 3)
 # x_val = np.squeeze(x_val)
 # x_test = np.squeeze(x_test)
 
-# t1 = time.time()
-
 # history = model.fit(x_train, y_train, 
 #           validation_data=(x_val, y_val),
 #           batch_size=32, 
 #           epochs=100, 
 #           verbose=1,
 #           callbacks=callbacks_list)
-
-
-# t2 = time.time()
-# print('time 1 => ', t1)
-# print('time 2 => ', t2)
-# print(t2 - t1)
 
 # ### storing Model in JSON --------------------------------------------------
 
@@ -118,9 +115,7 @@ input_shape = (224, 224, 3)
 ### EXTRACT FEATURES ---------------------------------------------------------
 
 cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
-model = load_model('./weights.hdf5')
 extract_model = tf.keras.Model(model.inputs, model.layers[-5].output) 
-
 print(extract_model.summary())
 
 def process_input(img_path):
@@ -129,10 +124,7 @@ def process_input(img_path):
         x = utils.img_to_array(img)
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
-        predicted = extract_model.predict(x)[0]
-        # print('predicted => ', predicted.shape)
-        # print('predicted[0] => ', predicted[0].shape)
-        img_features = predicted
+        img_features = extract_model.predict(x)[0]
         return img_features
     except NameError:
         print('error => ', img_path)
@@ -150,30 +142,20 @@ for city in cities_indicators['city_code'].unique():
     count = count+1
     for i in range(df_filter.shape[0]):
         img = process_input(df_filter.iloc[i, 0])
-        print('img => ', img.shape)
-
         city_images.append(img)
-    print('city_images => ', len(city_images[0][0][0]))
-    print('df_filter => ', df_filter.iloc[0, 1])
-    print('mean => ', (np.mean(city_images, axis=0)).shape)
     city_feat = np.append(np.mean(city_images, axis=0), df_filter.iloc[0, 1])
     cities_images.append(city_feat)
-    print('cities_images => ', len(cities_images[0]))
     population_labels.append(df_filter.iloc[0, 5])
     income_labels.append(df_filter.iloc[0, 6])
-    break
-
-# print()
 
 features_final = np.asarray(cities_images)
-print('features_final => ', features_final.shape)
-# print(features_final.shape)
+print(features_final.shape)
 
-# features_finetuning = features_final
-# population_finetuning = np.asarray(population_labels)
-# income_finetuning = np.asarray(income_labels)
+features_finetuning = features_final
+population_finetuning = np.asarray(population_labels)
+income_finetuning = np.asarray(income_labels)
 
-# ### Save data --------------------------------------------------------------
-# np.save('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy', features_finetuning)
-# np.save('../../dataset/features/resnet50_imagenet_finetuning/population.npy', population_finetuning)
-# np.save('../../dataset/features/resnet50_imagenet_finetuning/income.npy', income_finetuning)
+### Save data --------------------------------------------------------------
+np.save('../../dataset/features/resnet50_so2sat/features_with_city_code.npy', features_finetuning)
+np.save('../../dataset/features/resnet50_so2sat/population.npy', population_finetuning)
+np.save('../../dataset/features/resnet50_so2sat/income.npy', income_finetuning)

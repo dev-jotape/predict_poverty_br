@@ -10,8 +10,8 @@ from sklearn.metrics import make_scorer
 from sklearn.decomposition import PCA
 
 # Carrega o conjunto de dados
-x_all = np.load('../../dataset/features/resnet50_ucmerced/features_with_city_code.npy')
-y_all = np.load('../../dataset/features/resnet50_ucmerced/income.npy')
+x_all = np.load('../../dataset/features/resnet50_so2sat/features_with_city_code.npy')
+y_all = np.load('../../dataset/features/resnet50_so2sat/income.npy')
 
 # Normalizando os dados
 scaler = StandardScaler()
@@ -74,14 +74,14 @@ print('RMSE ', RMSE)
 print('MAE ', MAE)
 
 '''
-best alpha =>  10
-best l1_ratio =>  0.9
-avg score =>  -163.01375187410852
-best position =>  33
-mae =>  -163.01375187410852
-rmse =>  -214.89296672041854
-r2 =>  0.1589897021964146
-R2  0.4101630788835898
-RMSE  268.08521268766583
-MAE  180.12933162829262
+best alpha =>  1
+best l1_ratio =>  0.15
+avg score =>  -160.25073981480944
+best position =>  23
+mae =>  -160.25073981480944
+rmse =>  -207.931241901698
+r2 =>  0.1777572744625918
+R2  0.20830626359428828
+RMSE  310.5885826876534
+MAE  222.1223762825084
 '''

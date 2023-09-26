@@ -29,10 +29,7 @@ x_all = scaler.fit_transform(x_all)
 ### TUNE LAMBDA
 
 # Divida o conjunto de dados em conjunto de treinamento e validação
-x_train, x_val, y_train, y_val = train_test_split(x_all, y_all, test_size=0.3, random_state=42)
-
-print('X TRAIN SHAPE => ', x_train.shape)
-print('Y TRAIN SHAPE => ', x_val.shape)
+x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=0.15, random_state=0)
 
 # Set up GridSearchCV with nested cross-validation
 '''
@@ -46,7 +43,14 @@ n_jobs: Numero de jobs rodando em paralelo. None significa 1. -1 significa todos
 cv: numero de folds. Ex: se 5, os dados serão divididos em 5 folds e o modelo será executado 5 vezes, cada vez com um conjunto diferente.
 '''
 param_grid = {'alpha': [0.001, 0.01, 0.1, 1, 10, 100], 'l1_ratio': [0, 1, 0.5], 'max_iter': [100000], 'tol': [0.0001]}
-grid_cv = GridSearchCV(ElasticNet(), param_grid, cv=10, scoring='neg_mean_absolute_error', n_jobs=-1)
+
+def rmse(y_true, y_pred, **kwargs):
+    RMSE = mean_squared_error(y_true, y_pred, squared=False)
+    return RMSE
+scorer = make_scorer(rmse, greater_is_better=False)
+scoring = {"rmse": scorer, 'mae': 'neg_mean_absolute_error', 'r2': 'r2'}
+refit = 'mae'
+grid_cv = GridSearchCV(ElasticNet(), param_grid, cv=10, scoring=scoring, n_jobs=-1, refit=refit)
 
 # Train the model
 grid_cv.fit(x_train, y_train)
@@ -54,45 +58,38 @@ grid_cv.fit(x_train, y_train)
 # Get the best hyperparameters
 alpha = grid_cv.best_params_['alpha']
 l1_ratio = grid_cv.best_params_['l1_ratio']
-
+rank = np.where(grid_cv.cv_results_['rank_test_'+refit]==1)[0][0]
 print('best alpha => ', alpha)
 print('best l1_ratio => ', l1_ratio)
-# print('cv results => ', grid_cv.cv_results_)
 print('avg score => ', grid_cv.best_score_)
+print('best position => ', rank)
+print('mae => ', grid_cv.cv_results_['mean_test_mae'][rank])
+print('rmse => ', grid_cv.cv_results_['mean_test_rmse'][rank])
+print('r2 => ', grid_cv.cv_results_['mean_test_r2'][rank])
 
-# Train the model on the complete training set
-model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=10000, tol=0.0001)
-# model = ElasticNetCV(alpha=0.01, l1_ratio=1, max_iter=10000, tol=0.0001,cv=10)
-model.fit(x_train, y_train)
+# print('CV RESULTS => ', grid_cv.cv_results_)
 
-# Make predictions on test set
-predictions = model.predict(x_val)
+predictions = grid_cv.predict(x_test)
 
 # Evaluate the model
-R2 = r2_score(y_val, predictions)
-RMSE = mean_squared_error(y_val, predictions, squared=False)
-MAE = mean_absolute_error(y_val, predictions)
-
-print('predictions ', predictions)
-print('real ', y_val)
-# print('real ', y_ba)
+R2 = r2_score(y_test, predictions)
+RMSE = mean_squared_error(y_test, predictions, squared=False)
+MAE = mean_absolute_error(y_test, predictions)
 
 print('R2 ', R2)
 print('RMSE ', RMSE)
 print('MAE ', MAE)
 
-# if y in log
-# predictions_exp = np.exp(predictions)
-# y_exp = np.exp(y_val)
+'''
+best alpha =>  1
+best l1_ratio =>  0.5
+avg score =>  -173.9716046951716
+best position =>  11
+mae =>  -173.9716046951716
+rmse =>  -231.1692910214095
+r2 =>  0.05756975548418362
 
-
-# print('predictions_exp ', predictions_exp)
-# print('y_exp ', y_exp)
-
-# R2_exp = r2_score(y_exp, predictions_exp)
-# RMSE_exp = mean_squared_error(y_exp, predictions_exp, squared=False)
-# MAE_exp = mean_absolute_error(y_exp, predictions_exp)
-
-# print('R2 exp ', R2_exp)
-# print('RMSE exp ', RMSE_exp)
-# print('MAE exp ', MAE_exp)
+R2  0.3683238718702092
+RMSE  277.43044261208917
+MAE  186.3295389961404
+'''

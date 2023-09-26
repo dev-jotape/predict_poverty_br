@@ -13,6 +13,10 @@ from sklearn.decomposition import PCA
 x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy')
 y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income.npy')
 
+# print(x_all.shape)
+
+# exit()
+
 # Normalizando os dados
 scaler = StandardScaler()
 x_all = scaler.fit_transform(x_all)
@@ -62,6 +66,8 @@ print('mae => ', grid_cv.cv_results_['mean_test_mae'][rank])
 print('rmse => ', grid_cv.cv_results_['mean_test_rmse'][rank])
 print('r2 => ', grid_cv.cv_results_['mean_test_r2'][rank])
 
+print('CV RESULTS => ', grid_cv.cv_results_)
+
 predictions = grid_cv.predict(x_test)
 
 # Evaluate the model
@@ -72,6 +78,26 @@ MAE = mean_absolute_error(y_test, predictions)
 print('R2 ', R2)
 print('RMSE ', RMSE)
 print('MAE ', MAE)
+
+
+total = np.sum(y_train)
+length = len(y_train)
+avg = total / length
+desvio_absoluto = grid_cv.cv_results_['mean_test_mae'][rank] - avg
+desvio_percentual = (desvio_absoluto/avg) * 100
+print('total => ', total)
+print('tamanho => ', length)
+print('media => ', avg)
+print('desvio absoluto => ', desvio_absoluto)
+print('desvio porcentagem => ', desvio_percentual)
+
+'''
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -229.6699159663866
+desvio porcentagem =>  -65.71950988435788
+'''
 
 
 '''
