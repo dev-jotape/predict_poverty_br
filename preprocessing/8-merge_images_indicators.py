@@ -2,8 +2,12 @@ import pandas as pd
 from os import listdir
 from os.path import isfile, join
 
-### IMPORT POPULATION FILE (CENSO 2022) ---------------------------------------------------
+### IMPORT POPULATION DENSITY FILE (CENSO 2022) ---------------------------------------------------
+population_density = pd.read_excel('../excel-files/population_density_censo2022.xlsx', skiprows=3, skipfooter=1)
+population_density.columns = ['city_code', 'city', 'density']
+# print(population_density.info())
 
+### IMPORT POPULATION FILE (CENSO 2022) ---------------------------------------------------
 raw_population = pd.read_excel('../excel-files/previa_populacao_censo_2022.xls', skiprows=1, skipfooter=34, converters={'COD. MUNIC':str,'COD. UF':str})
 raw_population['city_code'] = (raw_population['COD. UF'] + raw_population['COD. MUNIC']).astype(int)
 
@@ -50,8 +54,10 @@ imagePaths[['city_code', 'rank']] = imagePaths.apply(lambda x: split_city(x.path
 
 ### MERGE FILES ---------------------------------------------------
 
-merge_indicators = pd.merge(population, income, on=['city_name', 'city_uf'])
-final_merge = pd.merge(imagePaths, merge_indicators, on='city_code')
-print(final_merge)
+pop_income = pd.merge(population, income, on=['city_name', 'city_uf'])
+pop_income_density = pd.merge(pop_income, population_density, on='city_code')
+final_merge = pd.merge(imagePaths, pop_income_density, on='city_code')
+# print(final_merge)
+# print(final_merge.info())
 
 final_merge.to_csv('../excel-files/cities_indicators.csv', index=False)
