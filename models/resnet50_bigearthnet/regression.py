@@ -11,7 +11,8 @@ from sklearn.metrics import make_scorer
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/resnet50_bigearth/features_with_city_code.npy')
 # y_all = np.load('../../dataset/features/resnet50_bigearth/population.npy')
-y_all = np.load('../../dataset/features/resnet50_bigearth/income.npy')
+# y_all = np.load('../../dataset/features/resnet50_bigearth/income.npy')
+y_all = np.load('../../dataset/features/resnet50_bigearth/density.npy')
 
 print(x_all.shape)
 print(y_all.shape)
@@ -92,4 +93,18 @@ r2 =>  0.05756975548418362
 R2  0.3683238718702092
 RMSE  277.43044261208917
 MAE  186.3295389961404
+
+-----------------------------------
+DENSITY
+
+best alpha =>  10
+best l1_ratio =>  0.5
+avg score =>  -26.629294815420288
+best position =>  14
+mae =>  -26.629294815420288
+rmse =>  -36.916761236616296
+r2 =>  -0.6206886116820601
+R2  0.05179180501443448
+RMSE  43.916428061123966
+MAE  31.809285621062383
 '''

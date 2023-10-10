@@ -11,7 +11,8 @@ from sklearn.metrics import make_scorer
 
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy')
-y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy')
+# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy')
+y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/density.npy')
 
 # Normalizando os dados
 scaler = StandardScaler()
@@ -85,4 +86,29 @@ r2 =>  0.44114029895573187
 R2  0.24477036501839133
 RMSE  303.3516727130843
 MAE  198.6184308322153
+
+----------------------------
+DENSITY (WITH PCA)
+best alpha =>  100
+best l1_ratio =>  0.15
+avg score =>  -23.18682734928874
+best position =>  47
+mae =>  -23.18682734928874
+rmse =>  -32.806492116821595
+r2 =>  -0.7215018739226877
+R2  0.17460514718451603
+RMSE  40.97378040004142
+MAE  28.89974964575675
+
+DENSITY (WITHOUT PCA)
+best alpha =>  10
+best l1_ratio =>  0.5
+avg score =>  -22.707685735776533
+best position =>  39
+mae =>  -22.707685735776533
+rmse =>  -32.916623721255434
+r2 =>  -0.47171981560499104
+R2  0.21516903104355933
+RMSE  39.95427212356433
+MAE  26.89069463945313
 '''

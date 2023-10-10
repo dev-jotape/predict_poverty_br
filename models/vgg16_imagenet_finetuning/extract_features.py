@@ -171,15 +171,18 @@ input_shape = (224,224,3)
 # print('Test accuracy:', score[1]) 
 
 ### EXTRACT FEATURES ---------------------------------------------------
-# cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
+cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
 
-# base_model = load_model('./weights_v2.hdf5')
+base_model = load_model('./weights.hdf5')
+extract_model = tf.keras.Model(base_model.inputs, base_model.get_layer('block5_pool').output) 
 # extract_model = tf.keras.Model(base_model.inputs, base_model.get_layer('conv_8').output) 
 
 base_model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
 
-print(base_model.summary())
-exit()
+# print(base_model.summary())
+print(extract_model.summary())
+
+# exit()
 def process_input(img_path):
     try:
         img = utils.load_img('../../' + img_path, target_size=input_shape)
@@ -196,6 +199,7 @@ def process_input(img_path):
 cities_images = []
 population_labels = []
 income_labels = []
+density_labels = []
 count = 0
 for city in cities_indicators['city_code'].unique():
     df_filter = cities_indicators[cities_indicators['city_code']==city]
@@ -209,6 +213,7 @@ for city in cities_indicators['city_code'].unique():
     cities_images.append(city_feat)
     population_labels.append(df_filter.iloc[0, 5])
     income_labels.append(df_filter.iloc[0, 6])
+    density_labels.append(df_filter.iloc[0, 8])
 
 features_final = np.asarray(cities_images)
 print(features_final.shape)
@@ -216,8 +221,11 @@ print(features_final.shape)
 features_finetuning = features_final
 population_finetuning = np.asarray(population_labels)
 income_finetuning = np.asarray(income_labels)
+density_finetuning = np.asarray(density_labels)
 
+print(density_finetuning)
 ### Save data --------------------------------------------------------------
 np.save('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code_v2.npy', features_finetuning)
-# np.save('../../dataset/features/vgg16_imagenet_finetuning/population_imagenet_finetuning.npy', population_finetuning)
-# np.save('../../dataset/features/vgg16_imagenet_finetuning/income_imagenet_finetuning.npy', income_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/population_imagenet_finetuning.npy', population_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/income_imagenet_finetuning.npy', income_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/density.npy', density_finetuning)

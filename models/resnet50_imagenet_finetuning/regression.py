@@ -11,7 +11,8 @@ from sklearn.decomposition import PCA
 
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy')
-y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income.npy')
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income.npy')
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
 
 # print(x_all.shape)
 
@@ -66,7 +67,7 @@ print('mae => ', grid_cv.cv_results_['mean_test_mae'][rank])
 print('rmse => ', grid_cv.cv_results_['mean_test_rmse'][rank])
 print('r2 => ', grid_cv.cv_results_['mean_test_r2'][rank])
 
-print('CV RESULTS => ', grid_cv.cv_results_)
+# print('CV RESULTS => ', grid_cv.cv_results_)
 
 predictions = grid_cv.predict(x_test)
 
@@ -124,4 +125,39 @@ r2 =>  0.4887727888481347
 R2  0.5187656777550106
 RMSE  242.15039372892244
 MAE  173.35162158801108
+
+--------------------------------------
+DENSITY (WITH PCA)
+best alpha =>  100
+best l1_ratio =>  0
+avg score =>  -21.76296329384929
+best position =>  35
+mae =>  -21.76296329384929
+rmse =>  -31.697693804033985
+r2 =>  -0.5130110471958467
+R2  0.4814196527132364
+RMSE  32.47754434787088
+MAE  25.241472566777393
+total =>  3497.03
+tamanho =>  119
+media =>  29.386806722689077
+desvio absoluto =>  -51.14977001653837
+desvio porcentagem =>  -174.05691778360682
+
+DENSITY (WITHOUT PCA)
+best alpha =>  1
+best l1_ratio =>  0.15
+avg score =>  -20.831723459668122
+best position =>  23
+mae =>  -20.831723459668122
+rmse =>  -31.251523799678967
+r2 =>  -0.33618562408122193
+R2  0.4577584933900791
+RMSE  33.21020347254983
+MAE  25.90941098573642
+total =>  3497.03
+tamanho =>  119
+media =>  29.386806722689077
+desvio absoluto =>  -50.2185301823572
+desvio porcentagem =>  -170.88801330559093
 '''

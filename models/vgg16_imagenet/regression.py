@@ -15,20 +15,21 @@ warnings.filterwarnings("ignore")
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/vgg16_imagenet/features_with_city_code.npy')
 # y_all = np.load('../../dataset/features/vgg16_imagenet/population.npy')
-y_all = np.load('../../dataset/features/vgg16_imagenet/income.npy')
+# y_all = np.load('../../dataset/features/vgg16_imagenet/income.npy')
+y_all = np.load('../../dataset/features/vgg16_imagenet/density.npy')
 
 # Normalizando os dados
 scaler = StandardScaler()
 x_all = scaler.fit_transform(x_all)
 
 #scale predictor variables
-pca = PCA()
-x_all = pca.fit_transform(x_all)
+# pca = PCA()
+# x_all = pca.fit_transform(x_all)
 
 ### TUNE LAMBDA
 
 # Divida o conjunto de dados em conjunto de treinamento e teste
-x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=0.15, random_state=0)
+x_train, x_test, y_train, y_test = train_test_split(x_all, y_all, test_size=0.15, random_state=128)
 
 # print(x_train.shape)
 # print(x_test.shape)
@@ -92,6 +93,18 @@ r2 =>  0.32197654194244685
 R2  0.5166988437244643
 RMSE  242.6698376091206
 MAE  162.21274901318674
+
+DENSITY
+best alpha =>  10
+best l1_ratio =>  0.05
+avg score =>  -22.438519413219524
+best position =>  37
+mae =>  -22.438519413219524
+rmse =>  -29.982866401858047
+r2 =>  -0.39349480600535963
+R2  0.22443483309951373
+RMSE  44.82087045860344
+MAE  22.54103553657776
 '''
 
 # if y in log

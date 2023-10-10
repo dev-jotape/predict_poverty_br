@@ -134,6 +134,7 @@ def process_input(img_path):
 cities_images = []
 population_labels = []
 income_labels = []
+density_labels = []
 count = 0
 for city in cities_indicators['city_code'].unique():
     df_filter = cities_indicators[cities_indicators['city_code']==city]
@@ -147,6 +148,7 @@ for city in cities_indicators['city_code'].unique():
     cities_images.append(city_feat)
     population_labels.append(df_filter.iloc[0, 5])
     income_labels.append(df_filter.iloc[0, 6])
+    density_labels.append(df_filter.iloc[0, 8])
 
 features_final = np.asarray(cities_images)
 print(features_final.shape)
@@ -154,8 +156,11 @@ print(features_final.shape)
 features_finetuning = features_final
 population_finetuning = np.asarray(population_labels)
 income_finetuning = np.asarray(income_labels)
+density_finetuning = np.asarray(density_labels)
 
+print(density_finetuning)
 ### Save data --------------------------------------------------------------
 np.save('../../dataset/features/resnet50_resisc45/features_with_city_code.npy', features_finetuning)
 np.save('../../dataset/features/resnet50_resisc45/population.npy', population_finetuning)
 np.save('../../dataset/features/resnet50_resisc45/income.npy', income_finetuning)
+np.save('../../dataset/features/resnet50_resisc45/density.npy', density_finetuning)
