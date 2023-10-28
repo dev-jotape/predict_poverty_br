@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, Dataset
 import os
 from PIL import Image 
 from geotorchai.models.raster import SatCNN
+from torchvision.models import resnet50, ResNet50_Weights
 
 from train_model import PytorchTrainingAndTest
 
@@ -15,9 +16,10 @@ data_dir = '../../dataset/google_images'
 
 # Transformações para redimensionar e normalizar as imagens
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize((128, 128)),
     transforms.ToTensor(),
     transforms.Normalize((0.3295, 0.3599, 0.3076), (0.1815, 0.1401, 0.1258))  # Normalização
+    # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Normalização
 ])
 
 # Crie um conjunto de dados personalizado
@@ -51,19 +53,22 @@ class CustomDataset(Dataset):
 dataset = CustomDataset(data_dir, transform=transform)
 
 dataset_size = len(dataset)
-train_size = int(0.7 * dataset_size)
-val_size = int(0.15 * dataset_size)
-test_size = dataset_size - train_size - val_size
+print(dataset_size)
+train_size = int(0.85 * dataset_size)
+# val_size = int(0.15 * dataset_size)
+test_size = dataset_size - train_size
 
-train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
-    dataset, [train_size, val_size, test_size])
+train_dataset, test_dataset = torch.utils.data.random_split(
+    dataset, [train_size, test_size])
+print(len(train_dataset))
+print(len(test_dataset))
 
 # Crie os dataloaders
 batch_size = 32
 learning_rate = 0.0001
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size)
+# val_loader = DataLoader(val_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
 # channels_sum, channels_squared_sum, num_batches = 0, 0, 0
@@ -79,8 +84,13 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
 # print(norm_params)
 
-model = SatCNN(3, 224, 224, 3)
+model = SatCNN(3, 128, 128, 3)
 
+# model = resnet50(weights=ResNet50_Weights.DEFAULT, progress=True)
+# model.fc = nn.Linear(2048, 3)
+
+print(model)
 trainer = PytorchTrainingAndTest()
 
-trainer.run_model(1, model, 'SatCNN', 'google_images', train_loader, test_loader, learning_rate, 10, 3)
+trainer.run_model(1, model, 'SatCNN', 'google_images', train_loader, test_loader, learning_rate, 30, 3)
+# trainer.run_model(2, model, 'ResNet50_finetuning', 'google_images', train_loader, test_loader, learning_rate, 30, 3)
