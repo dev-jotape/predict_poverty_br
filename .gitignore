@@ -7,3 +7,4 @@ dataset
 **.json
 **.pkl
 __pycache__
+trained-weights/
