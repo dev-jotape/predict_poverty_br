@@ -67,20 +67,20 @@ callbacks_list = [checkpoint, lr_reduce, early]
 
 print('IMPORT DATA -----------------------------')
 
-x_all = np.load('../../dataset/inputs/x_all_{}.npy'.format(version))
+x_all = np.load('../../dataset/inputs/x_all_reg.npy')
 y_all = np.load('../../dataset/inputs/y_all_{}.npy'.format(version))
 
-print('y_all => ', y_all)
+# print('y_all => ', y_all)
 
 train_ratio = 0.7
 val_ratio = 0.15
 test_ratio = 0.15
 
 # Divida o conjunto de dados em conjunto de treinamento e teste
-x_train_val, x_test, y_train_val, y_test = train_test_split(x_all, y_all, stratify=y_all, test_size=test_ratio, random_state=123)
+x_train_val, x_test, y_train_val, y_test = train_test_split(x_all, y_all, test_size=test_ratio, random_state=123)
 
 # Divida o conjunto de treinamento em conjunto de treinamento e validação
-x_train, x_val, y_train, y_val = train_test_split(x_train_val, y_train_val, stratify=y_train_val, test_size=val_ratio/(train_ratio+val_ratio), random_state=123)
+x_train, x_val, y_train, y_val = train_test_split(x_train_val, y_train_val, test_size=val_ratio/(train_ratio+val_ratio), random_state=123)
 
 print('train size => ', len(x_train))
 print('val size => ', len(x_val))
