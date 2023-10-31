@@ -9,10 +9,11 @@ import tensorflow.keras.utils as utils
 from sklearn.metrics import make_scorer
 from sklearn.decomposition import PCA
 
+version = 'p4'
 # Carrega o conjunto de dados
-x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_with_city_code.npy')
-# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income.npy')
-y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
+x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_{}.npy'.format(version))
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version))
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
 
 # print(x_all.shape)
 
@@ -127,6 +128,61 @@ RMSE  242.15039372892244
 MAE  173.35162158801108
 
 --------------------------------------
+
+INCOME (GMM)
+best alpha =>  0.1
+best l1_ratio =>  0.7
+avg score =>  -122.13775479708879
+best position =>  18
+mae =>  -122.13775479708879
+rmse =>  -168.54335126081497
+r2 =>  0.49215914970803754
+
+R2  0.5883910215170387
+RMSE  223.94909006479477
+MAE  156.80783811155644
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -471.6076707634754
+desvio porcentagem =>  -134.94943318921807
+
+INCOME (P3)
+best alpha =>  0.1
+best l1_ratio =>  1
+avg score =>  -119.65795033094173
+best position =>  20
+mae =>  -119.65795033094173
+rmse =>  -166.74410788674024
+r2 =>  0.4890182590458589
+R2  0.3916590662137992
+RMSE  272.2578448959787
+MAE  182.9808350304119
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -469.12786629732835
+desvio porcentagem =>  -134.23984293470653
+
+INCOME (P4)
+best alpha =>  1
+best l1_ratio =>  0.5
+avg score =>  -120.04207464508423
+best position =>  24
+mae =>  -120.04207464508423
+rmse =>  -168.09046935230822
+r2 =>  0.5434940906967322
+R2  0.5890793172007436
+RMSE  223.76176703017498
+MAE  142.44656563287003
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -469.5119906114709
+desvio porcentagem =>  -134.34975920978286
+
+--------------------------------------
+
 DENSITY (WITH PCA)
 best alpha =>  100
 best l1_ratio =>  0

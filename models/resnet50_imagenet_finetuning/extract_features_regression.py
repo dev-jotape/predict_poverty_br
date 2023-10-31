@@ -13,8 +13,7 @@ import os
 
 # Define the input shape of your model
 input_shape = (224, 224, 3)
-num_classes = 3
-version = 'gmm'
+version = 'reg_normalized'
 
 # Create an instance of the ResNet50 model without the top layer
 base_model = ResNet50(include_top=False, input_shape=input_shape, weights='imagenet')
@@ -27,7 +26,7 @@ x = base_model.output
 x = tf.keras.layers.Flatten()(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
 x = tf.keras.layers.Dropout(0.5)(x)
-predictions = tf.keras.layers.Dense(num_classes, activation='softmax')(x)
+predictions = tf.keras.layers.Dense(1, activation='linear')(x)
 model = tf.keras.Model(inputs = base_model.input, outputs = predictions)
 
 lr = 1e-4
@@ -47,33 +46,29 @@ METRICS = [
 
 # Compilar modelo
 model.compile(
-    loss='categorical_crossentropy',
+    loss='mae',
     optimizer=optimizer,
-    metrics=METRICS,
+    metrics=['mse', 'mae'],
 )
 
 # Fit model (storing  weights) -------------------------------------------
 filepath="./weights_{}.hdf5".format(version)
 print('filepath => ', filepath)
 checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, 
-                             monitor='val_accuracy', 
+                             monitor='val_mae', 
                              verbose=1, 
                              save_best_only=True, 
                              mode='max')
 
-lr_reduce   = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, min_delta=1e-5, patience=3, verbose=0)
-early       = tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=5, mode='max')
-checkpoint  = tf.keras.callbacks.ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+lr_reduce   = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_mae', factor=0.1, min_delta=1e-5, patience=3, verbose=0)
+early       = tf.keras.callbacks.EarlyStopping(monitor='val_mae', patience=5, mode='max')
+checkpoint  = tf.keras.callbacks.ModelCheckpoint(filepath, monitor='val_mae', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint, lr_reduce, early]
 
 print('IMPORT DATA -----------------------------')
 
-x_all = np.load('../../dataset/inputs/x_all.npy')
+x_all = np.load('../../dataset/inputs/x_all_{}.npy'.format(version))
 y_all = np.load('../../dataset/inputs/y_all_{}.npy'.format(version))
-
-print('y_all => ', y_all)
-
-y_all = utils.to_categorical(y_all, num_classes=num_classes)
 
 print('y_all => ', y_all)
 
