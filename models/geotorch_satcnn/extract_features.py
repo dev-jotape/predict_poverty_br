@@ -68,18 +68,18 @@ class CustomDataset(Dataset):
 # Crie um DataLoader para o conjunto de dados
 dataset = CustomDataset(data_dir, transform=transform)
 
-dataset_size = len(dataset)
-print(dataset_size)
-train_size = int(0.85 * dataset_size)
-test_size = dataset_size - train_size
+# dataset_size = len(dataset)
+# print(dataset_size)
+# train_size = int(0.85 * dataset_size)
+# test_size = dataset_size - train_size
 
-train_dataset, test_dataset = torch.utils.data.random_split(
-    dataset, [train_size, test_size])
-print(len(train_dataset))
-print(len(test_dataset))
+# train_dataset, test_dataset = torch.utils.data.random_split(
+#     dataset, [train_size, test_size])
+# print(len(train_dataset))
+# print(len(test_dataset))
 
 
-train_loader = DataLoader(test_dataset, batch_size=32)
+train_loader = DataLoader(dataset, batch_size=32)
 
 images,labels = next(iter(train_loader))
 

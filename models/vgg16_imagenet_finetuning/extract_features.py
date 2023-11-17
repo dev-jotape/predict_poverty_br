@@ -18,13 +18,22 @@ from keras.layers.convolutional import Conv2D, AveragePooling2D
 # import time
 
 print('IMPORT DATA -----------------------------')
-input_shape = (224,224,3)
+
+# Define the input shape of your model
+input_shape = (224, 224, 3)
+num_classes = 3
+version = 'gmm'
 
 ### Load data --------------------------------------------------------------
-# x_all = np.load('../../dataset/x_all_v2.npy')
-# y_all = np.load('../../dataset/y_all_v2.npy')
+# x_all = np.load('../../dataset/inputs/x_all.npy')
+# y_all = np.load('../../dataset/inputs/y_all_{}.npy'.format(version))
 
-# y_all = utils.to_categorical(y_all, num_classes=3)
+# print('y_all => ', y_all)
+
+# y_all = utils.to_categorical(y_all, num_classes=num_classes)
+
+# print('y_all => ', y_all)
+
 
 # train_ratio = 0.7
 # val_ratio = 0.15
@@ -39,42 +48,27 @@ input_shape = (224,224,3)
 # print('CREATING MODEL -----------------------------')
 
 # # Cria o modelo base VGG16
-# base_model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
+# base_model = VGG16(weights='imagenet', input_shape=input_shape, include_top=False)
 # print(base_model.summary())
 
-# model = tf.keras.Sequential([
-#     base_model,
-#     Conv2D(4096, (6, 6), 
-#         activation='relu', 
-#         input_shape=(12, 12, 512), 
-#         strides=(6, 6), 
-#         name='input'),
-#     Dropout(0.5),
-#     Conv2D(4096, (1, 1), 
-#         activation='relu', 
-#         strides=(1, 1), 
-#         name='conv_7'),
-#     Dropout(0.5),
-#     Conv2D(4096, (1, 1), 
-#         strides=(1, 1), 
-#         name='conv_8'),
-#     # AveragePooling2D((2, 2), 
-#     #     strides=(1, 1), 
-#     #     name='add_pool'),
-#     Flatten(name='flatten'),
-#     Dense(3),
-#     Activation("softmax")
-# ])
-
-# for i, layer in enumerate(base_model.layers):
-#     print(i, layer.name, layer.trainable)
-
 # # x = base_model.get_layer('fc2').output
-# # # x = Flatten()(x)
+# # x = Flatten()(x)
 # # x = Dense(256, activation='relu')(x)
 # # x = Dropout(0.5)(x)
 # # predictions = Dense(3, activation='softmax')(x)
 # # model = tf.keras.Model(inputs = base_model.input, outputs = predictions)
+
+# x = base_model.output
+# x = tf.keras.layers.Dense(4096, activation='relu')(x)
+# x = tf.keras.layers.Dropout(0.5)(x)
+# x = tf.keras.layers.Dense(4096, activation='relu')(x)
+# x = tf.keras.layers.Dropout(0.5)(x)
+# x = tf.keras.layers.Flatten(name='flatten2')(x)
+# predictions = tf.keras.layers.Dense(num_classes, activation='softmax')(x)
+# model = tf.keras.Model(inputs = base_model.input, outputs = predictions)
+
+# for i, layer in enumerate(base_model.layers):
+#     print(i, layer.name, layer.trainable)
 
 # lr = 1e-4
 # optimizer = Adam(learning_rate=lr)
@@ -99,7 +93,7 @@ input_shape = (224,224,3)
 # )
 
 # # Fit model (storing  weights) -------------------------------------------
-# filepath="./weights_v3.hdf5"
+# filepath="./weights_{}.hdf5".format(version)
 # checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, 
 #                              monitor='val_accuracy', 
 #                              verbose=1, 
@@ -136,19 +130,20 @@ input_shape = (224,224,3)
 #         plot_roc(y_true, y_pred, ax=ax)
 #         fig.savefig(os.path.join(self.image_dir, f'roc_curve_epoch_{epoch}'))
 
-# x_train = np.squeeze(x_train)
-# x_val = np.squeeze(x_val)
-# x_test = np.squeeze(x_test)
-
 # # performance_cbk = PerformanceVisualizationCallback(x_val, y_val, 'confusion_matrix.png')
 # performance_cbk = PerformanceVisualizationCallback(
 #                       model=model,
 #                       validation_data=(x_val, y_val),
 #                       image_dir='performance_vizualizations')
+
 # # callbacks_list = [performance_cbk, checkpoint, lr_reduce, early]
 # callbacks_list = [checkpoint, lr_reduce, early]
 
 # print('TRAINING MODEL -----------------------------')
+
+# x_train = np.squeeze(x_train)
+# x_val = np.squeeze(x_val)
+# x_test = np.squeeze(x_test)
 
 # history = model.fit(x_train, y_train, 
 #           validation_data=(x_val, y_val),
@@ -161,7 +156,7 @@ input_shape = (224,224,3)
 
 # model_json = model.to_json()
 
-# with open("./model_v3.json", "w") as json_file:
+# with open("./model_{}.json".format(version), "w") as json_file:
 #     json_file.write(simplejson.dumps(simplejson.loads(model_json), indent=4))
 
 # ### evaluate model ---------------------------------------------------------
@@ -173,9 +168,11 @@ input_shape = (224,224,3)
 ### EXTRACT FEATURES ---------------------------------------------------
 cities_indicators = pd.read_csv('../../excel-files/cities_indicators.csv')
 
-base_model = load_model('./weights.hdf5')
+base_model = load_model("./weights_{}.hdf5".format(version))
+print(base_model.summary())
 extract_model = tf.keras.Model(base_model.inputs, base_model.get_layer('block5_pool').output) 
 # extract_model = tf.keras.Model(base_model.inputs, base_model.get_layer('conv_8').output) 
+# extract_model = tf.keras.Model(base_model.inputs, base_model.layers[-8].output) 
 
 base_model = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
 
@@ -184,8 +181,9 @@ print(extract_model.summary())
 
 # exit()
 def process_input(img_path):
+    img = os.path.basename(img_path)
     try:
-        img = utils.load_img('../../' + img_path, target_size=input_shape)
+        img = utils.load_img('../../dataset/google_images_all/' + img, target_size=input_shape)
         x = utils.img_to_array(img)
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
@@ -225,7 +223,7 @@ density_finetuning = np.asarray(density_labels)
 
 print(density_finetuning)
 ### Save data --------------------------------------------------------------
-np.save('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code_v2.npy', features_finetuning)
-np.save('../../dataset/features/vgg16_imagenet_finetuning/population_imagenet_finetuning.npy', population_finetuning)
-np.save('../../dataset/features/vgg16_imagenet_finetuning/income_imagenet_finetuning.npy', income_finetuning)
-np.save('../../dataset/features/vgg16_imagenet_finetuning/density.npy', density_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/features_{}.npy'.format(version), features_finetuning)
+# np.save('../../dataset/features/vgg16_imagenet_finetuning/population_{}.npy'.format(version), population_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/income_{}.npy'.format(version), income_finetuning)
+np.save('../../dataset/features/vgg16_imagenet_finetuning/density_{}.npy'.format(version), density_finetuning)

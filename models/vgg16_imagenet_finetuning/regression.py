@@ -9,10 +9,15 @@ import tensorflow.keras.utils as utils
 from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer
 
+version = 'gmm'
+
 # Carrega o conjunto de dados
-x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy')
-# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy')
-y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/density.npy')
+# x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_{}.npy'.format(version))
+x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy'.format(version))
+# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income_{}.npy'.format(version))
+y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy'.format(version))
+# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/density_{}.npy'.format(version))
+
 
 # Normalizando os dados
 scaler = StandardScaler()
@@ -111,4 +116,64 @@ r2 =>  -0.47171981560499104
 R2  0.21516903104355933
 RMSE  39.95427212356433
 MAE  26.89069463945313
+
+INCOME (P3)
+best alpha =>  0.1
+best l1_ratio =>  0
+avg score =>  -182.56584033279398
+best position =>  18
+mae =>  -182.56584033279398
+rmse =>  -223.92519433016145
+r2 =>  -0.014897161346256549
+R2  0.24991924880224503
+RMSE  302.3158329459576
+MAE  220.31945505903124
+
+INCOME (P4)
+best alpha =>  0.1
+best l1_ratio =>  0
+avg score =>  -182.56584033279398
+best position =>  18
+mae =>  -182.56584033279398
+rmse =>  -223.92519433016145
+r2 =>  -0.014897161346256405
+R2  0.24991924880224503
+RMSE  302.3158329459576
+MAE  220.31945505903124
+
+DENSITY (GMM)
+best alpha =>  1
+best l1_ratio =>  0.15
+avg score =>  -23.298140362650404
+best position =>  29
+mae =>  -23.298140362650404
+rmse =>  -32.84040935910682
+r2 =>  -0.8826910042426835
+R2  0.1814387464245103
+RMSE  40.80381305348346
+MAE  31.383617625896207
+
+DENSITY (P3)
+best alpha =>  0.001
+best l1_ratio =>  0
+avg score =>  -26.38452127611157
+best position =>  0
+mae =>  -26.38452127611157
+rmse =>  -36.85556999010104
+r2 =>  -0.7426054772738503
+R2  -0.0967774941268762
+RMSE  47.23179191013731
+MAE  32.54857847402417
+
+DENSITY (P4)
+best alpha =>  0.001
+best l1_ratio =>  0
+avg score =>  -26.384521287036915
+best position =>  0
+mae =>  -26.384521287036915
+rmse =>  -36.85556999038531
+r2 =>  -0.7426054778726894
+R2  -0.09677749365684174
+RMSE  47.231791900016496
+MAE  32.548578480318966
 '''

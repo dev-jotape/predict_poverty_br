@@ -9,11 +9,12 @@ import tensorflow.keras.utils as utils
 from sklearn.metrics import make_scorer
 from sklearn.decomposition import PCA
 
+# version = 'reg_normalized'
 version = 'p4'
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_{}.npy'.format(version))
-y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version))
-# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version))
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
 
 # print(x_all.shape)
 
@@ -44,6 +45,7 @@ n_jobs: Numero de jobs rodando em paralelo. None significa 1. -1 significa todos
 cv: numero de folds. Ex: se 5, os dados serão divididos em 5 folds e o modelo será executado 5 vezes, cada vez com um conjunto diferente.
 '''
 param_grid = {'alpha': [0.001, 0.01, 0.1, 1, 10, 100], 'l1_ratio': [0, .05, .15, .5, .7, .9, 1], 'max_iter': [1000], 'tol': [0.0001]}
+# param_grid = {'alpha': [0.1], 'l1_ratio': [1], 'max_iter': [1000], 'tol': [0.0001]}
 
 def rmse(y_true, y_pred, **kwargs):
     RMSE = mean_squared_error(y_true, y_pred, squared=False)
@@ -137,7 +139,6 @@ best position =>  18
 mae =>  -122.13775479708879
 rmse =>  -168.54335126081497
 r2 =>  0.49215914970803754
-
 R2  0.5883910215170387
 RMSE  223.94909006479477
 MAE  156.80783811155644
@@ -181,6 +182,39 @@ media =>  349.4699159663866
 desvio absoluto =>  -469.5119906114709
 desvio porcentagem =>  -134.34975920978286
 
+INCOME (REGRESSION)
+best alpha =>  10
+best l1_ratio =>  0.05
+avg score =>  -141.8590019625239
+best position =>  29
+mae =>  -141.8590019625239
+rmse =>  -188.65023685304604
+r2 =>  0.36519369183538974
+R2  0.5021197296576648
+RMSE  246.30279534681517
+MAE  179.84191446171812
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -491.3289179289105
+desvio porcentagem =>  -140.59262199157894
+
+INCOME (REGRESSION WITH PCA)
+best alpha =>  100
+best l1_ratio =>  0.5
+avg score =>  -137.207479335208
+best position =>  38
+mae =>  -137.207479335208
+rmse =>  -184.51384907430705
+r2 =>  0.3462691458641774
+R2  0.4844938728844017
+RMSE  250.6246584932309
+MAE  182.66875635352002
+total =>  41586.920000000006
+tamanho =>  119
+media =>  349.4699159663866
+desvio absoluto =>  -486.67739530159463
+
 --------------------------------------
 
 DENSITY (WITH PCA)
@@ -216,4 +250,38 @@ tamanho =>  119
 media =>  29.386806722689077
 desvio absoluto =>  -50.2185301823572
 desvio porcentagem =>  -170.88801330559093
+
+DENSITY (P3)
+best alpha =>  100
+best l1_ratio =>  0.05
+avg score =>  -21.542770743670893
+best position =>  36
+mae =>  -21.542770743670893
+rmse =>  -32.83304440102971
+r2 =>  -0.37863227087702833
+R2  0.44896370924077433
+RMSE  33.478443505317045
+MAE  24.77196946202814
+total =>  3497.03
+tamanho =>  119
+media =>  29.386806722689077
+desvio absoluto =>  -50.92957746635997
+desvio porcentagem =>  -173.3076272864927
+
+DENSITY (P4)
+best alpha =>  1
+best l1_ratio =>  1
+avg score =>  -19.966433841174357
+best position =>  27
+mae =>  -19.966433841174357
+rmse =>  -30.680433699620323
+r2 =>  -0.159515259993733
+R2  0.4264176345557076
+RMSE  34.15647564540918
+MAE  25.063588022968766
+total =>  3497.03
+tamanho =>  119
+media =>  29.386806722689077
+desvio absoluto =>  -49.35324056386344
+desvio porcentagem =>  -167.94352999830565
 '''
