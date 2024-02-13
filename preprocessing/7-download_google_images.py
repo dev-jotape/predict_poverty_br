@@ -6,7 +6,7 @@ import numpy as np
 
 # Define API parameters ------------------------------------------------------
 
-base_url = "BASE_URL"
+base_url = "http://maps.googleapis.com/maps/api/staticmap?"
 key = "KEY"
 count = 0
 
