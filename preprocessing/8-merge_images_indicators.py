@@ -2,9 +2,17 @@ import pandas as pd
 from os import listdir
 from os.path import isfile, join
 
+### IMPORT GPD PER CAPITA FILE (IBGE 2020) ---------------------------------------------------
+gpd = pd.read_excel('../excel-files/pib_2020.xls')
+gpd = gpd[gpd['Ano'] == 2020]
+gpd = gpd[['Código do Município', 'Produto Interno Bruto per capita, \na preços correntes\n(R$ 1,00)']]
+gpd.columns = ['city_code', 'gpd']
+# print(gpd.info())
+
 ### IMPORT POPULATION DENSITY FILE (CENSO 2022) ---------------------------------------------------
 population_density = pd.read_excel('../excel-files/population_density_censo2022.xlsx', skiprows=3, skipfooter=1)
 population_density.columns = ['city_code', 'city', 'density']
+del population_density['city']
 # print(population_density.info())
 
 ### IMPORT POPULATION FILE (CENSO 2022) ---------------------------------------------------
@@ -56,8 +64,9 @@ imagePaths[['city_code', 'rank']] = imagePaths.apply(lambda x: split_city(x.path
 
 pop_income = pd.merge(population, income, on=['city_name', 'city_uf'])
 pop_income_density = pd.merge(pop_income, population_density, on='city_code')
-final_merge = pd.merge(imagePaths, pop_income_density, on='city_code')
+pop_income_density_gpd = pd.merge(pop_income_density, gpd, on='city_code')
+final_merge = pd.merge(imagePaths, pop_income_density_gpd, on='city_code')
 # print(final_merge)
 # print(final_merge.info())
 
-final_merge.to_csv('../excel-files/cities_indicators.csv', index=False)
+final_merge.to_csv('../excel-files/cities_indicators2.csv', index=False)

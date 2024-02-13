@@ -8,14 +8,16 @@ import numpy as np
 import tensorflow.keras.utils as utils
 from sklearn.metrics import make_scorer
 from sklearn.decomposition import PCA
+import pandas as pd
 
 # version = 'reg_normalized'
 version = 'p4'
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/features_{}.npy'.format(version))
-# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version))
-y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
-
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version))
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy')
+# y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/gpd_{}.npy'.format(version))
+print(y_all)
 # print(x_all.shape)
 
 # exit()
@@ -23,6 +25,9 @@ y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/density.npy
 # Normalizando os dados
 scaler = StandardScaler()
 x_all = scaler.fit_transform(x_all)
+
+# scaler2 = StandardScaler()
+# y_all = scaler2.fit_transform(y_all.reshape(-1,1))
 
 #scale predictor variables
 # pca = PCA()
@@ -74,6 +79,9 @@ print('r2 => ', grid_cv.cv_results_['mean_test_r2'][rank])
 
 predictions = grid_cv.predict(x_test)
 
+df = pd.DataFrame(grid_cv.cv_results_)
+df.to_csv('result_elasticnet.csv')
+
 # Evaluate the model
 R2 = r2_score(y_test, predictions)
 RMSE = mean_squared_error(y_test, predictions, squared=False)
@@ -83,17 +91,31 @@ print('R2 ', R2)
 print('RMSE ', RMSE)
 print('MAE ', MAE)
 
+print('\n\n')
 
-total = np.sum(y_train)
-length = len(y_train)
-avg = total / length
-desvio_absoluto = grid_cv.cv_results_['mean_test_mae'][rank] - avg
-desvio_percentual = (desvio_absoluto/avg) * 100
-print('total => ', total)
-print('tamanho => ', length)
-print('media => ', avg)
-print('desvio absoluto => ', desvio_absoluto)
-print('desvio porcentagem => ', desvio_percentual)
+# predictions_reverse = scaler2.inverse_transform(predictions.reshape(-1,1))
+# y_test_reverse = scaler2.inverse_transform(y_test)
+
+# # Evaluate the model
+# R2 = r2_score(y_test_reverse, predictions_reverse)
+# RMSE = mean_squared_error(y_test_reverse, predictions_reverse, squared=False)
+# MAE = mean_absolute_error(y_test_reverse, predictions_reverse)
+
+# print('R2 ', R2)
+# print('RMSE ', RMSE)
+# print('MAE ', MAE)
+
+
+# total = np.sum(y_train)
+# length = len(y_train)
+# avg = total / length
+# desvio_absoluto = grid_cv.cv_results_['mean_test_mae'][rank] - avg
+# desvio_percentual = (desvio_absoluto/avg) * 100
+# print('total => ', total)
+# print('tamanho => ', length)
+# print('media => ', avg)
+# print('desvio absoluto => ', desvio_absoluto)
+# print('desvio porcentagem => ', desvio_percentual)
 
 '''
 total =>  41586.920000000006
@@ -284,4 +306,38 @@ tamanho =>  119
 media =>  29.386806722689077
 desvio absoluto =>  -49.35324056386344
 desvio porcentagem =>  -167.94352999830565
+
+GPD (P4)
+best alpha =>  100
+best l1_ratio =>  0.9
+avg score =>  -9221.76851024749
+best position =>  40
+mae =>  -9221,76851024749
+rmse =>  -12560,690465201606
+r2 =>  0,22849209932314926
+R2  0,3568359347250918
+RMSE  10127,013754245547
+MAE  7660,471587421155
+total =>  2744643.4000000004
+tamanho =>  119
+media =>  23064.230252100842
+desvio absoluto =>  -32285.998762348332
+desvio porcentagem =>  -139.982988417346
+
+GPD (GMM)
+best alpha =>  100
+best l1_ratio =>  0.05
+avg score =>  -9670.86779100216
+best position =>  36
+mae =>  -9670.86779100216
+rmse =>  -13314.388307412813
+r2 =>  0.113192648939291
+R2  0.4122665787901858
+RMSE  9680.787958133722
+MAE  7608.7889185791355
+total =>  2744643.4000000004
+tamanho =>  119
+media =>  23064.230252100842
+desvio absoluto =>  -32735.098043103004
+desvio porcentagem =>  -141.93015628657832
 '''

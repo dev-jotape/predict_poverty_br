@@ -12,7 +12,8 @@ from sklearn.decomposition import PCA
 # Carrega o conjunto de dados
 x_all = np.load('../../dataset/features/resnet50_eurosat/features_with_city_code.npy')
 # y_all = np.load('../../dataset/features/resnet50_eurosat/income.npy')
-y_all = np.load('../../dataset/features/resnet50_eurosat/density.npy')
+# y_all = np.load('../../dataset/features/resnet50_eurosat/density.npy')
+y_all = np.load('../../dataset/features/resnet50_imagenet_finetuning/gpd_gmm.npy')
 
 # Normalizando os dados
 scaler = StandardScaler()
@@ -98,4 +99,16 @@ r2 =>  -0.6858101490097093
 R2  -0.10343380631251065
 RMSE  47.37489932725397
 MAE  32.76859143657463
+
+GPD
+best alpha =>  100
+best l1_ratio =>  0.7
+avg score =>  -11214.149029766631
+best position =>  39
+mae =>  -11214.149029766631
+rmse =>  -14748.280835315318
+r2 =>  -0.0779667697499586
+R2  0.22948977921592129
+RMSE  11084.336865685618
+MAE  8978.55783653144
 '''

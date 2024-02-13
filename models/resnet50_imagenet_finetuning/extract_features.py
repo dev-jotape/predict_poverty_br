@@ -13,8 +13,8 @@ import os
 
 # Define the input shape of your model
 input_shape = (224, 224, 3)
-num_classes = 3
-version = 'gmm'
+num_classes = 4
+version = 'p4'
 
 # Create an instance of the ResNet50 model without the top layer
 base_model = ResNet50(include_top=False, input_shape=input_shape, weights='imagenet')
@@ -125,6 +125,7 @@ with open("./model_{}.json".format(version), "w") as json_file:
 score = model.evaluate(x_test, y_test, verbose=1)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1]) 
+print('score:', score) 
 
 
 # GOOGLE IMAGES V1
@@ -138,6 +139,8 @@ print('Test accuracy:', score[1])
 # GOOGLE IMAGES V3
 # Test loss: 1.857861042022705
 # Test accuracy: 0.6399999856948853
+
+# 0.7209524083137512 0.7250363397598267, 0.7242856884002686, 0.8431046009063721
 
 ### EXTRACT FEATURES ---------------------------------------------------------
 
@@ -168,6 +171,7 @@ print('Test accuracy:', score[1])
 # population_labels = []
 # income_labels = []
 # density_labels = []
+# gpd_labels = []
 # count = 0
 # for city in cities_indicators['city_code'].unique():
 #     df_filter = cities_indicators[cities_indicators['city_code']==city]
@@ -181,7 +185,8 @@ print('Test accuracy:', score[1])
 #     cities_images.append(city_feat)
 #     population_labels.append(df_filter.iloc[0, 5])
 #     income_labels.append(df_filter.iloc[0, 6])
-#     density_labels.append(df_filter.iloc[0, 8])
+#     density_labels.append(df_filter.iloc[0, 7])
+#     gpd_labels.append(df_filter.iloc[0, 8])
 
 # features_final = np.asarray(cities_images)
 
@@ -189,6 +194,7 @@ print('Test accuracy:', score[1])
 # population_finetuning = np.asarray(population_labels)
 # income_finetuning = np.asarray(income_labels)
 # density_finetuning = np.asarray(density_labels)
+# gpd_finetuning = np.asarray(gpd_labels)
 
 # # print(density_finetuning)
 
@@ -197,3 +203,4 @@ print('Test accuracy:', score[1])
 # np.save('../../dataset/features/resnet50_imagenet_finetuning/population_{}.npy'.format(version), population_finetuning)
 # np.save('../../dataset/features/resnet50_imagenet_finetuning/income_{}.npy'.format(version), income_finetuning)
 # np.save('../../dataset/features/resnet50_imagenet_finetuning/density_{}.npy'.format(version), density_finetuning)
+# np.save('../../dataset/features/resnet50_imagenet_finetuning/gpd_{}.npy'.format(version), gpd_finetuning)

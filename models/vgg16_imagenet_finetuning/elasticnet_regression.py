@@ -9,14 +9,15 @@ import tensorflow.keras.utils as utils
 from sklearn.decomposition import PCA
 from sklearn.metrics import make_scorer
 
-version = 'gmm'
+version = 'p4'
 
 # Carrega o conjunto de dados
-# x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_{}.npy'.format(version))
-x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy'.format(version))
-# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income_{}.npy'.format(version))
-y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy'.format(version))
+x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_{}.npy'.format(version))
+# x_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/features_with_city_code.npy'.format(version))
+y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income_{}.npy'.format(version))
+# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/income.npy'.format(version))
 # y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/density_{}.npy'.format(version))
+# y_all = np.load('../../dataset/features/vgg16_imagenet_finetuning/gpd_{}.npy'.format(version))
 
 
 # Normalizando os dados
@@ -130,16 +131,16 @@ RMSE  302.3158329459576
 MAE  220.31945505903124
 
 INCOME (P4)
-best alpha =>  0.1
-best l1_ratio =>  0
-avg score =>  -182.56584033279398
-best position =>  18
-mae =>  -182.56584033279398
-rmse =>  -223.92519433016145
-r2 =>  -0.014897161346256405
-R2  0.24991924880224503
-RMSE  302.3158329459576
-MAE  220.31945505903124
+best alpha =>  0.01
+best l1_ratio =>  0.9
+avg score =>  -134.98742667508978
+best position =>  14
+mae =>  -134,98742667508978
+rmse =>  -199,57441558154443
+r2 =>  0,3655412141705304
+R2  0,1802444228843375
+RMSE  316,0451080610805
+MAE  208,99530412513005
 
 DENSITY (GMM)
 best alpha =>  1
@@ -176,4 +177,16 @@ r2 =>  -0.7426054778726894
 R2  -0.09677749365684174
 RMSE  47.231791900016496
 MAE  32.548578480318966
+
+GPD (P4)
+best alpha =>  10
+best l1_ratio =>  0.99
+avg score =>  -9396.895923571718
+best position =>  43
+mae =>  -9396,895923571718
+rmse =>  -13599,948789907252
+r2 =>  0,11087361184974072
+R2  0,24715615850504813
+RMSE  10956,528306068538
+MAE  8846,922894292175
 '''
